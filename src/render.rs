@@ -247,3 +247,41 @@ impl<P: PhaseItem> RenderCommand<P> for DrawMeshInstanced {
         RenderCommandResult::Success
     }
 }
+
+pub struct CellRenderer {
+    bounds: i32,
+    pub values: Vec<u8>,
+    pub neighbors: Vec<u8>,
+}
+
+impl CellRenderer {
+    pub fn new(bounds: i32) -> Self {
+        Self {
+            bounds: bounds,
+            values: vec![],
+            neighbors: vec![],
+        }
+    }
+
+    pub fn cell_count(&self) -> usize {
+        (self.bounds * self.bounds * self.bounds) as usize
+    }
+
+    pub fn set(&mut self, index: usize, value: u8, neighbors: u8) {
+        if self.values.len() != (self.bounds * self.bounds * self.bounds) as usize {
+            self.values.clear();
+            self.values
+                .resize((self.bounds * self.bounds * self.bounds) as usize, 0);
+            self.neighbors.clear();
+            self.neighbors
+                .resize((self.bounds * self.bounds * self.bounds) as usize, 0);
+        }
+        self.values[index] = value;
+        self.neighbors[index] = neighbors;
+    }
+
+    pub fn clear(&mut self) {
+        self.values.clear();
+        self.neighbors.clear();
+    }
+}

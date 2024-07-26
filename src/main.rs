@@ -1,5 +1,7 @@
 use bevy::{prelude::*, render::view::NoFrustumCulling};
+use iyes_perf_ui::{entries::PerfUiBundle, prelude::*};
 
+mod logic;
 mod render;
 mod rotating_camera;
 mod sim;
@@ -13,6 +15,11 @@ fn main() {
         .add_plugins((DefaultPlugins, CustomMaterialPlugin))
         .add_plugins(RotatingCameraPlugin)
         .add_plugins(SimsPlugin)
+        // we want Bevy to measure these values for us:
+        // .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
+        // .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
+        // .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
+        // .add_plugins(PerfUiPlugin)
         .add_systems(Startup, setup)
         .run();
 }
@@ -48,4 +55,6 @@ fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>) {
             ..default()
         })
         .insert(RotatingCamera::default());
+    // commands.spawn(PerfUiCompleteBundle::default());
+    // commands.spawn(PerfUiBundle::default());
 }
