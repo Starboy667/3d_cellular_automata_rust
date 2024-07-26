@@ -40,10 +40,10 @@ pub fn center(bounds: i32) -> IVec3 {
 }
 
 pub fn update(mut query: Query<&mut InstanceMaterialData>, mut this: ResMut<Sims>) {
+    let instance_data = &mut query.iter_mut().next().unwrap().0;
     this.logic.update();
     let mut renderer = this.renderer.take().unwrap();
     this.logic.render(&mut renderer);
-    let instance_data = &mut query.iter_mut().next().unwrap().0;
     instance_data.truncate(0);
     for i in 0..renderer.cell_count() as usize {
         let value = renderer.values[i];
@@ -51,14 +51,14 @@ pub fn update(mut query: Query<&mut InstanceMaterialData>, mut this: ResMut<Sims
         if value == 0 {
             continue;
         }
-        let pos = index_to_pos(i, bounds);
+        let pos = index_to_pos(i, this.bounds);
         instance_data.push(InstanceData {
-            position: (pos - center(bounds)).as_vec3(),
+            position: (pos - center(this.bounds)).as_vec3(),
             scale: 1.0,
             color: LinearRgba::from(Color::hsla(
-                pos.x as f32 * 360.0 / bounds as f32,
-                pos.y as f32 / bounds as f32,
-                pos.z as f32 / bounds as f32,
+                pos.x as f32 * 360.0 / this.bounds as f32,
+                pos.y as f32 / this.bounds as f32,
+                pos.z as f32 / this.bounds as f32,
                 1.0,
             ))
             .to_f32_array(),
