@@ -8,20 +8,23 @@ use bevy::{
 use crate::{
     logic,
     render::{CellRenderer, InstanceData, InstanceMaterialData},
+    rule,
 };
 
 #[derive(Resource)]
 pub struct Sims {
-    logic: logic::Logic,
-    renderer: Option<Box<CellRenderer>>,
+    logic_handler: logic::Logic,
+    render_handler: Option<Box<CellRenderer>>,
+    rule_handler: Option<Box<rule::Rule>>,
     bounds: i32,
 }
 
 impl Sims {
     pub fn new() -> Self {
         Self {
-            logic: logic::Logic::new(64),
-            renderer: Some(Box::new(CellRenderer::new(64))),
+            logic_handler: logic::Logic::new(64),
+            render_handler: Some(Box::new(CellRenderer::new(64))),
+            rule_handler: Some(Box::new(rule::Rule::new(rule::RuleMethod::Moore))),
             bounds: 64,
         }
     }
@@ -41,13 +44,13 @@ pub fn center(bounds: i32) -> IVec3 {
 
 pub fn update(mut query: Query<&mut InstanceMaterialData>, mut this: ResMut<Sims>) {
     let instance_data = &mut query.iter_mut().next().unwrap().0;
-    this.logic.update();
-    let mut renderer = this.renderer.take().unwrap();
-    this.logic.render(&mut renderer);
+    let rule = this.rule_handler.take().unwrap();
+    this.logic_handler.update(&rule);
+    let mut renderer = this.render_handler.take().unwrap();
+    this.logic_handler.render(&mut renderer);
     instance_data.truncate(0);
     for i in 0..renderer.cell_count() as usize {
         let value = renderer.values[i];
-        // let neighbors = renderer.neighbors[i];
         if value == 0 {
             continue;
         }
@@ -64,7 +67,8 @@ pub fn update(mut query: Query<&mut InstanceMaterialData>, mut this: ResMut<Sims
             .to_f32_array(),
         });
     }
-    this.renderer = Some(renderer);
+    this.render_handler = Some(renderer);
+    this.rule_handler = Some(rule);
 }
 
 pub struct SimsPlugin;

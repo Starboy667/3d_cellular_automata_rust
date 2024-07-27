@@ -1,10 +1,12 @@
 use bevy::{prelude::*, render::view::NoFrustumCulling};
-use iyes_perf_ui::{entries::PerfUiBundle, prelude::*};
+// use iyes_perf_ui::{entries::PerfUiBundle, prelude::*};
 
 mod logic;
 mod render;
 mod rotating_camera;
+mod rule;
 mod sim;
+mod utils;
 
 use render::{CustomMaterialPlugin, InstanceData, InstanceMaterialData};
 use rotating_camera::{RotatingCamera, RotatingCameraPlugin};
