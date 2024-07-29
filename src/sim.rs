@@ -21,10 +21,17 @@ pub struct Sims {
 
 impl Sims {
     pub fn new() -> Self {
+        let mut logic = logic::Logic::new(64);
+        // let tmp_rule = rule::Rule::new(rule::RuleMethod::Moore, vec![4], vec![4], 5);
+        let tmp_rule =
+            rule::Rule::new(rule::RuleMethod::Moore, vec![2, 6, 9], vec![4, 6, 8, 9], 10);
+
+        logic.update_neighbors(None, &tmp_rule);
+        let rule = Some(Box::new(tmp_rule));
         Self {
-            logic_handler: logic::Logic::new(64),
+            logic_handler: logic,
             render_handler: Some(Box::new(CellRenderer::new(64))),
-            rule_handler: Some(Box::new(rule::Rule::new(rule::RuleMethod::Moore))),
+            rule_handler: rule,
             bounds: 64,
         }
     }
