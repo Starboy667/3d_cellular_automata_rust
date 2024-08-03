@@ -284,4 +284,11 @@ impl CellRenderer {
         self.values.clear();
         self.neighbors.clear();
     }
+
+    pub fn set_size(&mut self, bounds: i32) {
+        self.values.resize((bounds * bounds * bounds) as usize, 0);
+        self.neighbors
+            .resize((bounds * bounds * bounds) as usize, 0);
+        self.bounds = bounds;
+    }
 }

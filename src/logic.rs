@@ -19,19 +19,27 @@ pub struct Logic {
 }
 
 impl Logic {
-    pub fn new(bounds: i32) -> Self {
-        let mut cells = vec![];
-        cells.resize(
+    pub fn new() -> Self {
+        Logic {
+            cells: vec![],
+            bounds: 0,
+        }
+    }
+
+    fn wrap(&self, pos: IVec3) -> IVec3 {
+        (pos + self.bounds) % self.bounds
+    }
+
+    pub fn set_size(&mut self, bounds: i32) {
+        self.bounds = bounds;
+        self.cells.clear();
+        self.cells.resize(
             (bounds * bounds * bounds) as usize,
             Cell {
                 value: 0,
                 neighbors: 0,
             },
         );
-        Self { cells, bounds }
-    }
-    fn wrap(&self, pos: IVec3) -> IVec3 {
-        (pos + self.bounds) % self.bounds
     }
 
     pub fn update(&mut self, rule_handler: &Rule) {

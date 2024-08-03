@@ -1,17 +1,17 @@
 use bevy::{prelude::*, render::view::NoFrustumCulling};
-// use iyes_perf_ui::{entries::PerfUiBundle, prelude::*};
+use iyes_perf_ui::{entries::PerfUiBundle, PerfUiPlugin};
+use render::{CustomMaterialPlugin, InstanceData, InstanceMaterialData};
+use rotating_camera::{RotatingCamera, RotatingCameraPlugin};
+use sim::SimsPlugin;
+use sim_ui::SimUIPlugin;
 
 mod logic;
 mod render;
 mod rotating_camera;
 mod rule;
 mod sim;
+mod sim_ui;
 mod utils;
-
-use iyes_perf_ui::{entries::PerfUiBundle, PerfUiPlugin};
-use render::{CustomMaterialPlugin, InstanceData, InstanceMaterialData};
-use rotating_camera::{RotatingCamera, RotatingCameraPlugin};
-use sim::SimsPlugin;
 
 fn main() {
     App::new()
@@ -23,6 +23,7 @@ fn main() {
         .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
         .add_plugins(PerfUiPlugin)
+        .add_plugins(SimUIPlugin)
         .add_systems(Startup, setup)
         .run();
 }

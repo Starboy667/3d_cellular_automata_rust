@@ -16,26 +16,42 @@ pub struct Sims {
     logic_handler: logic::Logic,
     render_handler: Option<Box<CellRenderer>>,
     rule_handler: Option<Box<rule::Rule>>,
-    bounds: i32,
+    pub bounds: i32,
+    setup: bool,
 }
 
 impl Sims {
     pub fn new() -> Self {
-        let mut logic = logic::Logic::new(64);
         // let tmp_rule = rule::Rule::new(rule::RuleMethod::Moore, vec![4], vec![4], 5);
         let tmp_rule =
             // rule::Rule::new(rule::RuleMethod::Moore, vec![2, 6, 9], vec![4, 6, 8, 9], 10);
         // rule::Rule::new(rule::RuleMethod::Moore, vec![4], vec![4], 5);
         rule::Rule::new(rule::RuleMethod::Moore, vec![5], vec![4, 6, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 24], 35);
 
-        logic.make_some_noise(&tmp_rule);
+        // logic.make_some_noise(&tmp_rule);
         let rule = Some(Box::new(tmp_rule));
         Self {
-            logic_handler: logic,
+            logic_handler: logic::Logic::new(),
             render_handler: Some(Box::new(CellRenderer::new(64))),
             rule_handler: rule,
             bounds: 64,
+            setup: false,
         }
+    }
+
+    pub fn set_size(&mut self, bounds: i32) {
+        let rule = self.rule_handler.as_ref().unwrap();
+        self.bounds = bounds;
+        self.logic_handler.set_size(bounds);
+        self.logic_handler.make_some_noise(&rule);
+        self.render_handler.as_mut().unwrap().set_size(bounds);
+    }
+
+    fn setup_sim(&mut self) {
+        let rule = self.rule_handler.as_ref().unwrap();
+        self.logic_handler.set_size(self.bounds);
+        self.logic_handler.make_some_noise(&rule);
+        self.render_handler.as_mut().unwrap().set_size(self.bounds);
     }
 }
 fn index_to_pos(index: usize, bounds: i32) -> IVec3 {
@@ -52,6 +68,10 @@ pub fn center(bounds: i32) -> IVec3 {
 }
 
 pub fn update(mut query: Query<&mut InstanceMaterialData>, mut this: ResMut<Sims>) {
+    if !this.setup {
+        this.setup_sim();
+        this.setup = true;
+    }
     let instance_data = &mut query.iter_mut().next().unwrap().0;
     let rule = this.rule_handler.take().unwrap();
     this.logic_handler.update(&rule);
