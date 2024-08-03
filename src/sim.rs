@@ -1,6 +1,6 @@
 use bevy::{
     app::{Plugin, Update},
-    color::{Color, ColorToComponents, LinearRgba},
+    color::{Color, ColorToComponents},
     math::{ivec3, IVec3},
     prelude::{Query, ResMut, Resource},
 };
@@ -24,9 +24,11 @@ impl Sims {
         let mut logic = logic::Logic::new(64);
         // let tmp_rule = rule::Rule::new(rule::RuleMethod::Moore, vec![4], vec![4], 5);
         let tmp_rule =
-            rule::Rule::new(rule::RuleMethod::Moore, vec![2, 6, 9], vec![4, 6, 8, 9], 10);
+            // rule::Rule::new(rule::RuleMethod::Moore, vec![2, 6, 9], vec![4, 6, 8, 9], 10);
+        // rule::Rule::new(rule::RuleMethod::Moore, vec![4], vec![4], 5);
+        rule::Rule::new(rule::RuleMethod::Moore, vec![5], vec![4, 6, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 24], 35);
 
-        logic.update_neighbors(None, &tmp_rule);
+        logic.make_some_noise(&tmp_rule);
         let rule = Some(Box::new(tmp_rule));
         Self {
             logic_handler: logic,
@@ -65,13 +67,14 @@ pub fn update(mut query: Query<&mut InstanceMaterialData>, mut this: ResMut<Sims
         instance_data.push(InstanceData {
             position: (pos - center(this.bounds)).as_vec3(),
             scale: 1.0,
-            color: LinearRgba::from(Color::hsla(
-                pos.x as f32 * 360.0 / this.bounds as f32,
+            color: (Color::linear_rgba(
+                pos.x as f32 / this.bounds as f32,
                 pos.y as f32 / this.bounds as f32,
                 pos.z as f32 / this.bounds as f32,
                 1.0,
-            ))
-            .to_f32_array(),
+            )
+            .to_linear()
+            .to_f32_array()),
         });
     }
     this.render_handler = Some(renderer);

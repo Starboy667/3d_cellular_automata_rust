@@ -6,5 +6,10 @@ edition = "2021"
 [dependencies]
 bevy = "0.14.0"
 bytemuck = "1.16.1"
+criterion = "0.5.1"
 iyes_perf_ui = "0.3.0"
 rand = "0.8.5"
+
+[[bench]]
+name = "my_benchmark"
+harness = false

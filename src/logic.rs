@@ -1,4 +1,5 @@
-use bevy::{math::IVec3, utils::hashbrown::HashSet};
+use bevy::math::IVec3;
+use rand::Rng;
 
 use crate::{
     render::CellRenderer,
@@ -27,75 +28,76 @@ impl Logic {
                 neighbors: 0,
             },
         );
-        let it = random_cells(bounds, 0.3);
-        for (x, y, z) in it {
-            let index = pos_to_index(&IVec3::new(x as i32, y as i32, z as i32), &bounds);
-            cells[index].value = 1;
-        }
         Self { cells, bounds }
+    }
+    fn wrap(&self, pos: IVec3) -> IVec3 {
+        (pos + self.bounds) % self.bounds
     }
 
     pub fn update(&mut self, rule_handler: &Rule) {
-        // println!("len {}", self.cells.len());
-        // println!("bounds {}", self.bounds);
-
-        // if self.cells.len() != (self.bounds * self.bounds * self.bounds) as usize {
-        //     println!("resize");
-        //     self.cells.clear();
-        //     self.cells.resize(
-        //         (self.bounds * self.bounds * self.bounds) as usize,
-        //         Cell {
-        //             value: 0,
-        //             neighbors: 0,
-        //         },
-        //     );
-        // }
         // TODO add noise at start + egui
-        let mut dead: Vec<usize> = vec![];
-        let mut alive: Vec<usize> = vec![];
+        let mut death: Vec<usize> = vec![];
+        let mut birth: Vec<usize> = vec![];
+        // for (index, cell) in self.cells.iter_mut().enumerate() {
+        //     // check spawn
+        //     if cell.value == 0 && rule_handler.birth[cell.neighbors as usize] {
+        //         cell.value = rule_handler.states;
+        //         birth.push(index);
+        //     }
+        //     // check survive
+        //     if cell.value != 0
+        //         && (cell.value < rule_handler.states
+        //             || !rule_handler.survive[cell.neighbors as usize])
+        //     {
+        //         if cell.value == rule_handler.states {
+        //             death.push(index);
+        //         }
+        //         cell.value -= 1;
+        //     }
+        // }
         for (index, cell) in self.cells.iter_mut().enumerate() {
-            // check spawn
-            if cell.value == 0 && rule_handler.alive[cell.neighbors as usize] {
-                cell.value = rule_handler.states;
-                alive.push(index);
-            }
-            // check survive
-            if cell.value < rule_handler.states || !rule_handler.dead[cell.neighbors as usize] {
-                if cell.value == rule_handler.states {
-                    dead.push(index);
+            if cell.value == 0 {
+                if rule_handler.birth[cell.neighbors as usize] {
+                    cell.value = rule_handler.states;
+                    birth.push(index);
                 }
-                if cell.value > 0 {
+            } else {
+                if cell.value < rule_handler.states
+                    || !rule_handler.survive[cell.neighbors as usize]
+                {
+                    if cell.value == rule_handler.states {
+                        death.push(index);
+                    }
                     cell.value -= 1;
                 }
             }
         }
-        // let neighbor_dead: Vec<IVec3> = dead
-        //     .iter()
-        //     .flat_map(|pos| {
-        //         rule_handler
-        //             .get_neighbors_iter()
-        //             .iter()
-        //             .map(|neighbor| *pos + *neighbor)
-        //             .collect::<Vec<IVec3>>()
-        //     })
-        //     .collect();
-        // let neighbor_alive: Vec<IVec3> = alive
-        //     .iter()
-        //     .flat_map(|pos| {
-        //         rule_handler
-        //             .get_neighbors_iter()
-        //             .iter()
-        //             .map(|neighbor| *pos + *neighbor)
-        //             .collect::<Vec<IVec3>>()
-        //     })
-        //     .collect();
-        // self.update_neighbors(None, rule_handler);
-        let merged: Vec<usize> = dead.into_iter().chain(alive.into_iter()).collect();
-        let unique_set: HashSet<_> = merged.into_iter().collect();
-        let result: Vec<_> = unique_set.into_iter().collect();
-        // println!("result {:?}", result);
-        // self.update_neighbors(Some(neighbor_dead), rule_handler);
-        self.update_neighbors(Some(result), rule_handler)
+        for index in birth {
+            self.test(rule_handler, index, true);
+        }
+        for index in death {
+            self.test(rule_handler, index, false);
+        }
+    }
+
+    fn test(&mut self, rule: &Rule, index: usize, inc: bool) {
+        let pos = index_to_pos(&index, &self.bounds);
+        if out_of_bounds(&pos, &self.bounds) {
+            return;
+        }
+        for dir in rule.get_neighbors_iter() {
+            let neighbor_pos = self.wrap(pos + *dir);
+            if out_of_bounds(&neighbor_pos, &self.bounds) {
+                continue;
+            }
+
+            let index = pos_to_index(&neighbor_pos, &self.bounds);
+            if inc {
+                self.cells[index].neighbors += 1;
+            } else {
+                self.cells[index].neighbors -= 1;
+            }
+        }
     }
 
     pub fn update_neighbors(&mut self, pos: Option<Vec<usize>>, rule: &Rule) {
@@ -134,7 +136,7 @@ impl Logic {
                     continue;
                 }
                 let neighbor_index = pos_to_index(&neighbor_pos, &self.bounds);
-                if self.cells[neighbor_index].value == 1 {
+                if self.cells[neighbor_index].value >= 1 {
                     neighbors += 1;
                 }
             }
@@ -149,4 +151,41 @@ impl Logic {
             renderer.set(index, cell.value, cell.neighbors);
         }
     }
+
+    pub fn make_some_noise(&mut self, rule: &Rule) {
+        // let it = random_cells(self.bounds, 0.2);
+        // for (x, y, z) in it {
+        //     let index = pos_to_index(&IVec3::new(x as i32, y as i32, z as i32), &self.bounds);
+        //     self.cells[index].value = rule.states;
+        //     self.test(rule, index, true);
+        // }
+        let bounds = self.bounds;
+        let mut f = |pos| {
+            let index = pos_to_index(&pos, &bounds);
+            if self.cells[index].value == 0 {
+                self.cells[index].value = rule.states;
+                self.test(rule, index, true);
+            }
+        };
+        let center = IVec3::new(bounds / 2, bounds / 2, bounds / 2);
+        let mut rand = rand::thread_rng();
+        (0..12 * 12 * 12).for_each(|_| {
+            f(center
+                + IVec3::new(
+                    rand.gen_range(-6..=6),
+                    rand.gen_range(-6..=6),
+                    rand.gen_range(-6..=6),
+                ));
+        });
+    }
+
+    // pub fn cell_count(&self) -> usize {
+    //     let mut result = 0;
+    //     for cell in &self.cells {
+    //         if !cell.is_dead() {
+    //             result += 1;
+    //         }
+    //     }
+    //     result
+    // }
 }

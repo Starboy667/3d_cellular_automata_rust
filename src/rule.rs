@@ -1,13 +1,15 @@
 use bevy::math::IVec3;
 
+#[derive(Debug)]
 pub struct Rule {
     method: RuleMethod,
     pub states: u8,
     // TODO optimize
-    pub alive: [bool; 27],
-    pub dead: [bool; 27],
+    pub birth: [bool; 27],
+    pub survive: [bool; 27],
 }
 
+#[derive(Debug)]
 pub enum RuleMethod {
     Moore,
     VonNeumann,
@@ -52,20 +54,20 @@ static MOORE: [IVec3; 26] = [
 ];
 
 impl Rule {
-    pub fn new(method: RuleMethod, alive: Vec<u8>, dead: Vec<u8>, states: u8) -> Self {
-        let mut dead_arr = [false; 27];
-        let mut alive_arr = [false; 27];
+    pub fn new(method: RuleMethod, survive: Vec<u8>, birth: Vec<u8>, states: u8) -> Self {
+        let mut survive_arr = [false; 27];
+        let mut birth_arr = [false; 27];
 
-        for i in dead {
-            dead_arr[i as usize] = true;
+        for i in survive {
+            survive_arr[i as usize] = true;
         }
-        for i in alive {
-            alive_arr[i as usize] = true;
+        for i in birth {
+            birth_arr[i as usize] = true;
         }
         Self {
             method,
-            alive: alive_arr,
-            dead: dead_arr,
+            birth: birth_arr,
+            survive: survive_arr,
             states,
         }
     }
