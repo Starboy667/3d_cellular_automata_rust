@@ -5,9 +5,11 @@ use bevy::{
 
 use crate::utils::distance;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum ColorHandler {
+    // rgb pos
     Rgb,
+    // dist center
     ColorPalette,
     StateShading,
     NeighborhoodDensity,

@@ -37,6 +37,7 @@ pub fn update_ui(mut this: ResMut<Sims>, mut contexts: EguiContexts) {
     // TODO simulator
     let mut bounds = this.bounds;
     egui::Window::new("Simulation").show(contexts.ctx_mut(), |ui| {
+        ui.label("Settings");
         // BOUNDS
         let old_bounds = bounds;
         ui.add(egui::Slider::new(&mut bounds, 30..=300).text("bounds"));
@@ -50,6 +51,14 @@ pub fn update_ui(mut this: ResMut<Sims>, mut contexts: EguiContexts) {
             this.update_timer
                 .set_duration(std::time::Duration::from_secs_f32(speed));
         }
+        ui.label("Rule");
+        ui.horizontal(|ui| {
+            for i in 0..this.rule_preset.len() {
+                if ui.button(&this.rule_preset[i].name).clicked() {
+                    this.load_rule_preset(i);
+                }
+            }
+        });
 
         // COLOR
         ui.label("Color mode");

@@ -24,6 +24,7 @@ pub struct Sims {
     pub glow: bool,
     pub color_palette: Vec<Color>,
     pub update_timer: Timer,
+    pub rule_preset: Vec<rule::RulePreset>,
 }
 
 impl Sims {
@@ -39,11 +40,12 @@ impl Sims {
             render_handler: Some(Box::new(CellRenderer::new(64))),
             rule_handler: rule,
             color_handler: ColorHandler::Rgb,
+            color_palette: vec![Color::srgb(0.0, 1.0, 1.0), Color::srgb(1.0, 0.0, 0.0)],
             bounds: 64,
             setup: false,
-            color_palette: vec![Color::srgb(0.0, 1.0, 1.0), Color::srgb(1.0, 0.0, 0.0)],
             glow: true,
             update_timer: Timer::from_seconds(0.0, bevy::time::TimerMode::Repeating),
+            rule_preset: vec![],
         }
     }
 
@@ -60,6 +62,17 @@ impl Sims {
         self.logic_handler.set_size(self.bounds);
         self.logic_handler.make_some_noise(&rule);
         self.render_handler.as_mut().unwrap().set_size(self.bounds);
+    }
+
+    fn get_presets(&mut self) {
+        self.rule_preset = rule::RulePreset::get_presets();
+    }
+
+    pub fn load_rule_preset(&mut self, index: usize) {
+        self.rule_handler = Some(Box::new(self.rule_preset[index].rule.clone()));
+        self.color_palette = self.rule_preset[index].color_palette.clone();
+        self.color_handler = self.rule_preset[index].color_handler.clone();
+        self.set_size(self.bounds);
     }
 }
 fn index_to_pos(index: usize, bounds: i32) -> IVec3 {
@@ -83,6 +96,7 @@ pub fn update(
     this.update_timer.tick(time.delta());
     if !this.setup {
         this.setup_sim();
+        this.get_presets();
         this.setup = true;
     }
     if !this.update_timer.finished() {

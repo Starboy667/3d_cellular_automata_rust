@@ -107,50 +107,50 @@ impl Logic {
         }
     }
 
-    pub fn update_neighbors(&mut self, pos: Option<Vec<usize>>, rule: &Rule) {
-        let cells = match pos {
-            Some(p) => p
-                .iter()
-                .flat_map(|pos| {
-                    rule.get_neighbors_iter().iter().map(|neighbor| {
-                        let pos = index_to_pos(pos, &self.bounds);
-                        pos + *neighbor
-                    })
-                })
-                .collect::<Vec<IVec3>>(),
-            None => {
-                let mut positions = Vec::new();
-                for x in 0..self.bounds {
-                    for y in 0..self.bounds {
-                        for z in 0..self.bounds {
-                            let pos = IVec3::new(x, y, z);
-                            positions.push(pos);
-                        }
-                    }
-                }
-                positions
-            }
-        };
+    // pub fn update_neighbors(&mut self, pos: Option<Vec<usize>>, rule: &Rule) {
+    //     let cells = match pos {
+    //         Some(p) => p
+    //             .iter()
+    //             .flat_map(|pos| {
+    //                 rule.get_neighbors_iter().iter().map(|neighbor| {
+    //                     let pos = index_to_pos(pos, &self.bounds);
+    //                     pos + *neighbor
+    //                 })
+    //             })
+    //             .collect::<Vec<IVec3>>(),
+    //         None => {
+    //             let mut positions = Vec::new();
+    //             for x in 0..self.bounds {
+    //                 for y in 0..self.bounds {
+    //                     for z in 0..self.bounds {
+    //                         let pos = IVec3::new(x, y, z);
+    //                         positions.push(pos);
+    //                     }
+    //                 }
+    //             }
+    //             positions
+    //         }
+    //     };
 
-        for pos in cells {
-            if out_of_bounds(&pos, &self.bounds) {
-                continue;
-            }
-            let mut neighbors = 0;
-            for neighbor in rule.get_neighbors_iter() {
-                let neighbor_pos = pos + *neighbor;
-                if out_of_bounds(&neighbor_pos, &self.bounds) {
-                    continue;
-                }
-                let neighbor_index = pos_to_index(&neighbor_pos, &self.bounds);
-                if self.cells[neighbor_index].value >= 1 {
-                    neighbors += 1;
-                }
-            }
-            let index = pos_to_index(&pos, &self.bounds);
-            self.cells[index].neighbors = neighbors;
-        }
-    }
+    //     for pos in cells {
+    //         if out_of_bounds(&pos, &self.bounds) {
+    //             continue;
+    //         }
+    //         let mut neighbors = 0;
+    //         for neighbor in rule.get_neighbors_iter() {
+    //             let neighbor_pos = pos + *neighbor;
+    //             if out_of_bounds(&neighbor_pos, &self.bounds) {
+    //                 continue;
+    //             }
+    //             let neighbor_index = pos_to_index(&neighbor_pos, &self.bounds);
+    //             if self.cells[neighbor_index].value >= 1 {
+    //                 neighbors += 1;
+    //             }
+    //         }
+    //         let index = pos_to_index(&pos, &self.bounds);
+    //         self.cells[index].neighbors = neighbors;
+    //     }
+    // }
 
     pub fn render(&self, renderer: &mut CellRenderer) {
         renderer.clear();
