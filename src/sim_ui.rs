@@ -14,11 +14,19 @@ pub fn update_ui(
     let mut bounds = this.bounds;
     egui::Window::new("Simulation").show(contexts.ctx_mut(), |ui| {
         let old_bounds = bounds;
-        ui.add(egui::Slider::new(&mut bounds, 0..=100).text("bounds"));
+        ui.add(egui::Slider::new(&mut bounds, 30..=300).text("bounds"));
         if bounds != old_bounds {
             this.set_size(bounds);
         }
     });
+    // TODO rules
+    // TODO colors
+    // TODO reset
+    // TODO pause
+    // TODO step
+    // TODO simulator
+    // TODO speed
+
     // let instance_data = &mut query.iter_mut().next().unwrap().0;
     // let rule = this.rule_handler.take().unwrap();
     // this.logic_handler.update(&rule);

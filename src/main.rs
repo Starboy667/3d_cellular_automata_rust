@@ -1,7 +1,7 @@
 use bevy::{prelude::*, render::view::NoFrustumCulling};
+use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use iyes_perf_ui::{entries::PerfUiBundle, PerfUiPlugin};
 use render::{CustomMaterialPlugin, InstanceData, InstanceMaterialData};
-use rotating_camera::{RotatingCamera, RotatingCameraPlugin};
 use sim::SimsPlugin;
 use sim_ui::SimUIPlugin;
 
@@ -16,9 +16,8 @@ mod utils;
 fn main() {
     App::new()
         .add_plugins((DefaultPlugins, CustomMaterialPlugin))
-        .add_plugins(RotatingCameraPlugin)
+        .add_plugins(PanOrbitCameraPlugin)
         .add_plugins(SimsPlugin)
-        // we want Bevy to measure these values for us:
         .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
@@ -58,7 +57,6 @@ fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>) {
             transform: Transform::from_xyz(0.0, 0.0, 15.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..default()
         })
-        .insert(RotatingCamera::default());
-    // commands.spawn(PerfUiCompleteBundle::default());
+        .insert(PanOrbitCamera::default());
     commands.spawn(PerfUiBundle::default());
 }

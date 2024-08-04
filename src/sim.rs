@@ -25,8 +25,8 @@ impl Sims {
         // let tmp_rule = rule::Rule::new(rule::RuleMethod::Moore, vec![4], vec![4], 5);
         let tmp_rule =
             // rule::Rule::new(rule::RuleMethod::Moore, vec![2, 6, 9], vec![4, 6, 8, 9], 10);
-        // rule::Rule::new(rule::RuleMethod::Moore, vec![4], vec![4], 5);
-        rule::Rule::new(rule::RuleMethod::Moore, vec![5], vec![4, 6, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 24], 35);
+        rule::Rule::new(rule::RuleMethod::Moore, vec![4], vec![4], 5);
+        // rule::Rule::new(rule::RuleMethod::Moore, vec![5], vec![4, 6, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 24], 35);
 
         // logic.make_some_noise(&tmp_rule);
         let rule = Some(Box::new(tmp_rule));

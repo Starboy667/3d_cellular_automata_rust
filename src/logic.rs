@@ -1,4 +1,5 @@
 use bevy::math::IVec3;
+use noise::{core::perlin::perlin_3d, NoiseFn, Perlin, Seedable};
 use rand::Rng;
 
 use crate::{
@@ -161,30 +162,46 @@ impl Logic {
     }
 
     pub fn make_some_noise(&mut self, rule: &Rule) {
-        // let it = random_cells(self.bounds, 0.2);
+        let scale = 0.1;
+        let perlin = Perlin::new(1);
+        for i in 0..self.bounds {
+            for j in 0..self.bounds {
+                for k in 0..self.bounds {
+                    let index = pos_to_index(&IVec3::new(i, j, k), &self.bounds);
+                    let val = perlin.get([i as f64 * scale, j as f64 * scale, k as f64 * scale]);
+                    if val > 0.7 {
+                        self.cells[index].value = rule.states;
+                        self.test(rule, index, true);
+                    }
+                }
+            }
+        }
+        // let it = random_cells(self.bounds, 0.8);
         // for (x, y, z) in it {
         //     let index = pos_to_index(&IVec3::new(x as i32, y as i32, z as i32), &self.bounds);
         //     self.cells[index].value = rule.states;
         //     self.test(rule, index, true);
         // }
-        let bounds = self.bounds;
-        let mut f = |pos| {
-            let index = pos_to_index(&pos, &bounds);
-            if self.cells[index].value == 0 {
-                self.cells[index].value = rule.states;
-                self.test(rule, index, true);
-            }
-        };
-        let center = IVec3::new(bounds / 2, bounds / 2, bounds / 2);
-        let mut rand = rand::thread_rng();
-        (0..12 * 12 * 12).for_each(|_| {
-            f(center
-                + IVec3::new(
-                    rand.gen_range(-6..=6),
-                    rand.gen_range(-6..=6),
-                    rand.gen_range(-6..=6),
-                ));
-        });
+
+        // let bounds = self.bounds;
+        // let mut f = |pos| {
+        //     let index = pos_to_index(&pos, &bounds);
+        //     dbg!(index, pos, bounds, self.bounds);
+        //     if self.cells[index].value == 0 {
+        //         self.cells[index].value = rule.states;
+        //         self.test(rule, index, true);
+        //     }
+        // };
+        // let center = IVec3::new(bounds / 2, bounds / 2, bounds / 2);
+        // let mut rand = rand::thread_rng();
+        // (0..12 * 12 * 12).for_each(|_| {
+        //     f(center
+        //         + IVec3::new(
+        //             rand.gen_range(-6..=6),
+        //             rand.gen_range(-6..=6),
+        //             rand.gen_range(-6..=6),
+        //         ));
+        // });
     }
 
     // pub fn cell_count(&self) -> usize {
