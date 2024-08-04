@@ -6,6 +6,7 @@ use bevy::{
 };
 
 use crate::{
+    color::ColorHandler,
     logic,
     render::{CellRenderer, InstanceData, InstanceMaterialData},
     rule,
@@ -15,9 +16,11 @@ use crate::{
 pub struct Sims {
     logic_handler: logic::Logic,
     render_handler: Option<Box<CellRenderer>>,
-    rule_handler: Option<Box<rule::Rule>>,
+    pub rule_handler: Option<Box<rule::Rule>>,
+    pub color_handler: ColorHandler,
     pub bounds: i32,
     setup: bool,
+    pub color_palette: Vec<Color>,
 }
 
 impl Sims {
@@ -25,8 +28,8 @@ impl Sims {
         // let tmp_rule = rule::Rule::new(rule::RuleMethod::Moore, vec![4], vec![4], 5);
         let tmp_rule =
             // rule::Rule::new(rule::RuleMethod::Moore, vec![2, 6, 9], vec![4, 6, 8, 9], 10);
-        rule::Rule::new(rule::RuleMethod::Moore, vec![4], vec![4], 5);
-        // rule::Rule::new(rule::RuleMethod::Moore, vec![5], vec![4, 6, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 24], 35);
+        // rule::Rule::new(rule::RuleMethod::Moore, vec![4], vec![4], 5);
+        rule::Rule::new(rule::RuleMethod::Moore, vec![5], vec![4, 6, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 24], 35);
 
         // logic.make_some_noise(&tmp_rule);
         let rule = Some(Box::new(tmp_rule));
@@ -34,8 +37,10 @@ impl Sims {
             logic_handler: logic::Logic::new(),
             render_handler: Some(Box::new(CellRenderer::new(64))),
             rule_handler: rule,
+            color_handler: ColorHandler::Rgb,
             bounds: 64,
             setup: false,
+            color_palette: vec![Color::srgb(0.0, 1.0, 1.0), Color::srgb(1.0, 0.0, 0.0)],
         }
     }
 
@@ -80,6 +85,7 @@ pub fn update(mut query: Query<&mut InstanceMaterialData>, mut this: ResMut<Sims
     instance_data.truncate(0);
     for i in 0..renderer.cell_count() as usize {
         let value = renderer.values[i];
+        let neighbors = renderer.neighbors[i];
         if value == 0 {
             continue;
         }
@@ -87,14 +93,18 @@ pub fn update(mut query: Query<&mut InstanceMaterialData>, mut this: ResMut<Sims
         instance_data.push(InstanceData {
             position: (pos - center(this.bounds)).as_vec3(),
             scale: 1.0,
-            color: (Color::linear_rgba(
-                pos.x as f32 / this.bounds as f32,
-                pos.y as f32 / this.bounds as f32,
-                pos.z as f32 / this.bounds as f32,
-                1.0,
-            )
-            .to_linear()
-            .to_f32_array()),
+            color: this.color_handler.get_color(
+                &pos,
+                &this.bounds,
+                &this
+                    .color_palette
+                    .iter()
+                    .map(|color| color.to_linear().to_f32_array())
+                    .collect(),
+                value,
+                rule.states,
+                neighbors,
+            ),
         });
     }
     this.render_handler = Some(renderer);

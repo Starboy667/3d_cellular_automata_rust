@@ -1,11 +1,10 @@
 use bevy::math::IVec3;
-use noise::{core::perlin::perlin_3d, NoiseFn, Perlin, Seedable};
-use rand::Rng;
+use noise::{NoiseFn, Perlin};
 
 use crate::{
     render::CellRenderer,
     rule::Rule,
-    utils::{index_to_pos, out_of_bounds, pos_to_index, random_cells},
+    utils::{index_to_pos, out_of_bounds, pos_to_index},
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -44,7 +43,6 @@ impl Logic {
     }
 
     pub fn update(&mut self, rule_handler: &Rule) {
-        // TODO add noise at start + egui
         let mut death: Vec<usize> = vec![];
         let mut birth: Vec<usize> = vec![];
         // for (index, cell) in self.cells.iter_mut().enumerate() {
@@ -176,41 +174,5 @@ impl Logic {
                 }
             }
         }
-        // let it = random_cells(self.bounds, 0.8);
-        // for (x, y, z) in it {
-        //     let index = pos_to_index(&IVec3::new(x as i32, y as i32, z as i32), &self.bounds);
-        //     self.cells[index].value = rule.states;
-        //     self.test(rule, index, true);
-        // }
-
-        // let bounds = self.bounds;
-        // let mut f = |pos| {
-        //     let index = pos_to_index(&pos, &bounds);
-        //     dbg!(index, pos, bounds, self.bounds);
-        //     if self.cells[index].value == 0 {
-        //         self.cells[index].value = rule.states;
-        //         self.test(rule, index, true);
-        //     }
-        // };
-        // let center = IVec3::new(bounds / 2, bounds / 2, bounds / 2);
-        // let mut rand = rand::thread_rng();
-        // (0..12 * 12 * 12).for_each(|_| {
-        //     f(center
-        //         + IVec3::new(
-        //             rand.gen_range(-6..=6),
-        //             rand.gen_range(-6..=6),
-        //             rand.gen_range(-6..=6),
-        //         ));
-        // });
     }
-
-    // pub fn cell_count(&self) -> usize {
-    //     let mut result = 0;
-    //     for cell in &self.cells {
-    //         if !cell.is_dead() {
-    //             result += 1;
-    //         }
-    //     }
-    //     result
-    // }
 }

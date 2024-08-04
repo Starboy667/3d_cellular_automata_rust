@@ -5,6 +5,7 @@ use render::{CustomMaterialPlugin, InstanceData, InstanceMaterialData};
 use sim::SimsPlugin;
 use sim_ui::SimUIPlugin;
 
+mod color;
 mod logic;
 mod render;
 mod rotating_camera;

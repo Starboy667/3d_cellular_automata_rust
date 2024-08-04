@@ -30,3 +30,7 @@ pub fn random_cells(bounds: i32, probability: f64) -> impl Iterator<Item = (usiz
         })
     })
 }
+
+pub fn distance(pos1: &IVec3, pos2: &IVec3) -> f32 {
+    (((pos1.x - pos2.x).pow(2) + (pos1.y - pos2.y).pow(2) + (pos1.z - pos2.z).pow(2)) as f32).sqrt()
+}

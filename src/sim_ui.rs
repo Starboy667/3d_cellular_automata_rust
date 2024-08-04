@@ -1,16 +1,43 @@
 use bevy::{
     app::{Plugin, Update},
-    prelude::{Query, ResMut},
+    color::Color,
+    prelude::ResMut,
 };
-use bevy_egui::{egui, EguiContexts, EguiPlugin};
+use bevy_egui::{
+    egui::{self, Color32},
+    EguiContexts, EguiPlugin,
+};
 
-use crate::{render::InstanceMaterialData, sim::Sims};
+use crate::{color::ColorHandler, sim::Sims};
 
-pub fn update_ui(
-    mut query: Query<&mut InstanceMaterialData>,
-    mut this: ResMut<Sims>,
-    mut contexts: EguiContexts,
-) {
+fn color_picker(ui: &mut egui::Ui, color: &mut Color) {
+    let old_color = color.to_linear();
+    let mut new_palette: Color32 = Color32::from_rgb(
+        (old_color.red * 255.0) as u8,
+        (old_color.green * 255.0) as u8,
+        (old_color.blue * 255.0) as u8,
+    );
+    egui::color_picker::color_edit_button_srgba(
+        ui,
+        &mut new_palette,
+        egui::color_picker::Alpha::Opaque,
+    );
+    *color = Color::linear_rgba(
+        new_palette.r() as f32 / 255.0,
+        new_palette.g() as f32 / 255.0,
+        new_palette.b() as f32 / 255.0,
+        1.0,
+    );
+}
+
+pub fn update_ui(mut this: ResMut<Sims>, mut contexts: EguiContexts) {
+    // TODO rules
+    // TODO states
+    // TODO reset
+    // TODO pause
+    // TODO step
+    // TODO simulator
+    // TODO speed
     let mut bounds = this.bounds;
     egui::Window::new("Simulation").show(contexts.ctx_mut(), |ui| {
         let old_bounds = bounds;
@@ -18,42 +45,29 @@ pub fn update_ui(
         if bounds != old_bounds {
             this.set_size(bounds);
         }
-    });
-    // TODO rules
-    // TODO colors
-    // TODO reset
-    // TODO pause
-    // TODO step
-    // TODO simulator
-    // TODO speed
 
-    // let instance_data = &mut query.iter_mut().next().unwrap().0;
-    // let rule = this.rule_handler.take().unwrap();
-    // this.logic_handler.update(&rule);
-    // let mut renderer = this.render_handler.take().unwrap();
-    // this.logic_handler.render(&mut renderer);
-    // instance_data.truncate(0);
-    // for i in 0..renderer.cell_count() as usize {
-    //     let value = renderer.values[i];
-    //     if value == 0 {
-    //         continue;
-    //     }
-    //     let pos = index_to_pos(i, this.bounds);
-    //     instance_data.push(InstanceData {
-    //         position: (pos - center(this.bounds)).as_vec3(),
-    //         scale: 1.0,
-    //         color: (Color::linear_rgba(
-    //             pos.x as f32 / this.bounds as f32,
-    //             pos.y as f32 / this.bounds as f32,
-    //             pos.z as f32 / this.bounds as f32,
-    //             1.0,
-    //         )
-    //         .to_linear()
-    //         .to_f32_array()),
-    //     });
-    // }
-    // this.render_handler = Some(renderer);
-    // this.rule_handler = Some(rule);
+        ui.label("Color mode");
+        ui.horizontal(|ui| {
+            ui.radio_value(&mut this.color_handler, ColorHandler::Rgb, "RGB");
+            ui.radio_value(
+                &mut this.color_handler,
+                ColorHandler::ColorPalette,
+                "ColorPalette",
+            );
+            ui.radio_value(
+                &mut this.color_handler,
+                ColorHandler::StateShading,
+                "StateShading",
+            );
+            ui.radio_value(
+                &mut this.color_handler,
+                ColorHandler::NeighborhoodDensity,
+                "NeighborhoodDensity",
+            );
+        });
+        color_picker(ui, &mut this.color_palette[0]);
+        color_picker(ui, &mut this.color_palette[1]);
+    });
 }
 
 pub struct SimUIPlugin;
