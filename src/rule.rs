@@ -4,7 +4,6 @@ use bevy::math::IVec3;
 pub struct Rule {
     method: RuleMethod,
     pub states: u8,
-    // TODO optimize
     pub birth: [bool; 27],
     pub survive: [bool; 27],
 }

@@ -34,19 +34,26 @@ pub fn update_ui(mut this: ResMut<Sims>, mut contexts: EguiContexts) {
     // TODO rules
     // TODO states
     // TODO reset
-    // TODO pause
-    // TODO step
     // TODO simulator
-    // TODO speed
     let mut bounds = this.bounds;
     egui::Window::new("Simulation").show(contexts.ctx_mut(), |ui| {
+        // BOUNDS
         let old_bounds = bounds;
         ui.add(egui::Slider::new(&mut bounds, 30..=300).text("bounds"));
         if bounds != old_bounds {
             this.set_size(bounds);
         }
+        // SPEED
+        let mut speed = this.update_timer.duration().as_secs_f32();
+        ui.add(egui::Slider::new(&mut speed, 0.0..=0.5).text("speed"));
+        if speed != this.update_timer.duration().as_secs_f32() {
+            this.update_timer
+                .set_duration(std::time::Duration::from_secs_f32(speed));
+        }
 
+        // COLOR
         ui.label("Color mode");
+        ui.checkbox(&mut this.glow, "Glow");
         ui.horizontal(|ui| {
             ui.radio_value(&mut this.color_handler, ColorHandler::Rgb, "RGB");
             ui.radio_value(
@@ -65,8 +72,11 @@ pub fn update_ui(mut this: ResMut<Sims>, mut contexts: EguiContexts) {
                 "NeighborhoodDensity",
             );
         });
-        color_picker(ui, &mut this.color_palette[0]);
-        color_picker(ui, &mut this.color_palette[1]);
+        if this.color_handler == ColorHandler::ColorPalette {
+            ui.label("Color palette");
+            color_picker(ui, &mut this.color_palette[0]);
+            color_picker(ui, &mut this.color_palette[1]);
+        }
     });
 }
 

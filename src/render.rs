@@ -95,6 +95,11 @@ impl SpecializedMeshPipeline for CustomPipeline {
                     offset: VertexFormat::Float32x4.size(),
                     shader_location: 4,
                 },
+                VertexAttribute {
+                    format: VertexFormat::Float32,
+                    offset: VertexFormat::Float32x4.size() * 2,
+                    shader_location: 5,
+                },
             ],
         });
         descriptor.fragment.as_mut().unwrap().shader = self.shader.clone();
@@ -128,6 +133,7 @@ pub struct InstanceData {
     pub position: Vec3,
     pub scale: f32,
     pub color: [f32; 4],
+    pub emissive: f32,
 }
 
 #[derive(Component)]

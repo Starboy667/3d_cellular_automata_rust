@@ -2,7 +2,8 @@ use bevy::{
     app::{Plugin, Update},
     color::{Color, ColorToComponents},
     math::{ivec3, IVec3},
-    prelude::{Query, ResMut, Resource},
+    prelude::{Query, Res, ResMut, Resource},
+    time::{Time, Timer},
 };
 
 use crate::{
@@ -20,7 +21,9 @@ pub struct Sims {
     pub color_handler: ColorHandler,
     pub bounds: i32,
     setup: bool,
+    pub glow: bool,
     pub color_palette: Vec<Color>,
+    pub update_timer: Timer,
 }
 
 impl Sims {
@@ -30,8 +33,6 @@ impl Sims {
             // rule::Rule::new(rule::RuleMethod::Moore, vec![2, 6, 9], vec![4, 6, 8, 9], 10);
         // rule::Rule::new(rule::RuleMethod::Moore, vec![4], vec![4], 5);
         rule::Rule::new(rule::RuleMethod::Moore, vec![5], vec![4, 6, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 24], 35);
-
-        // logic.make_some_noise(&tmp_rule);
         let rule = Some(Box::new(tmp_rule));
         Self {
             logic_handler: logic::Logic::new(),
@@ -41,6 +42,8 @@ impl Sims {
             bounds: 64,
             setup: false,
             color_palette: vec![Color::srgb(0.0, 1.0, 1.0), Color::srgb(1.0, 0.0, 0.0)],
+            glow: true,
+            update_timer: Timer::from_seconds(0.0, bevy::time::TimerMode::Repeating),
         }
     }
 
@@ -72,10 +75,18 @@ pub fn center(bounds: i32) -> IVec3 {
     ivec3(center, center, center)
 }
 
-pub fn update(mut query: Query<&mut InstanceMaterialData>, mut this: ResMut<Sims>) {
+pub fn update(
+    mut query: Query<&mut InstanceMaterialData>,
+    mut this: ResMut<Sims>,
+    time: Res<Time>,
+) {
+    this.update_timer.tick(time.delta());
     if !this.setup {
         this.setup_sim();
         this.setup = true;
+    }
+    if !this.update_timer.finished() {
+        return;
     }
     let instance_data = &mut query.iter_mut().next().unwrap().0;
     let rule = this.rule_handler.take().unwrap();
@@ -105,6 +116,11 @@ pub fn update(mut query: Query<&mut InstanceMaterialData>, mut this: ResMut<Sims
                 rule.states,
                 neighbors,
             ),
+            emissive: if this.glow {
+                1.0 + 10.0 * value as f32 / rule.states as f32
+            } else {
+                1.0
+            },
         });
     }
     this.render_handler = Some(renderer);

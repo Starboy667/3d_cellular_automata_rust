@@ -1,4 +1,8 @@
-use bevy::{prelude::*, render::view::NoFrustumCulling};
+use bevy::{
+    core_pipeline::{bloom::BloomSettings, tonemapping::Tonemapping},
+    prelude::*,
+    render::{camera::PhysicalCameraParameters, view::NoFrustumCulling},
+};
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use iyes_perf_ui::{entries::PerfUiBundle, PerfUiPlugin};
 use render::{CustomMaterialPlugin, InstanceData, InstanceMaterialData};
@@ -14,16 +18,28 @@ mod sim;
 mod sim_ui;
 mod utils;
 
+#[derive(Resource, Default, Deref, DerefMut)]
+struct Parameters(PhysicalCameraParameters);
+
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, CustomMaterialPlugin))
+        .add_plugins((
+            DefaultPlugins.set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "Cellular Automata".to_string(),
+                    ..default()
+                }),
+                ..default()
+            }),
+            CustomMaterialPlugin,
+        ))
         .add_plugins(PanOrbitCameraPlugin)
         .add_plugins(SimsPlugin)
+        .add_plugins(SimUIPlugin)
         .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
         .add_plugins(PerfUiPlugin)
-        .add_plugins(SimUIPlugin)
         .add_systems(Startup, setup)
         .run();
 }
@@ -39,6 +55,7 @@ fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>) {
                     position: Vec3::new(x * 10.0 - 5.0, y * 10.0 - 5.0, 0.0),
                     scale: 1.0,
                     color: LinearRgba::from(Color::hsla(x * 360., y, 0.5, 1.0)).to_f32_array(),
+                    emissive: 0.0,
                 })
                 .collect(),
         ),
@@ -54,10 +71,18 @@ fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>) {
 
     // camera
     commands
-        .spawn(Camera3dBundle {
-            transform: Transform::from_xyz(0.0, 0.0, 15.0).looking_at(Vec3::ZERO, Vec3::Y),
-            ..default()
-        })
+        .spawn((
+            Camera3dBundle {
+                camera: Camera {
+                    hdr: true,
+                    ..default()
+                },
+                tonemapping: Tonemapping::TonyMcMapface,
+                transform: Transform::from_xyz(200.0, 0.0, 15.0).looking_at(Vec3::ZERO, Vec3::Y),
+                ..default()
+            },
+            BloomSettings::NATURAL,
+        ))
         .insert(PanOrbitCamera::default());
     commands.spawn(PerfUiBundle::default());
 }
