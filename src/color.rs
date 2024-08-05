@@ -1,6 +1,6 @@
 use bevy::{
     color::{Color, ColorToComponents},
-    math::IVec3,
+    math::{IVec3, Vec4},
 };
 
 use crate::utils::distance;
@@ -50,8 +50,10 @@ impl ColorHandler {
             }
             ColorHandler::StateShading => {
                 let normalized_state: f32 = state as f32 / state_max as f32;
-                let green = 1.0 - normalized_state;
-                [1.0, green, 0.0, 1.0]
+                let color_1: Vec4 = palette[0].into();
+                let color_2: Vec4 = palette[1].into();
+                let dt = normalized_state.clamp(0.0, 1.0);
+                ((1.0 - dt) * color_1 + dt * color_2).into()
             }
             ColorHandler::NeighborhoodDensity => {
                 let max_neighbors = 9 + 8 + 9; // Moore

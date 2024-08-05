@@ -95,19 +95,19 @@ impl RulePreset {
             Self {
                 name: "builder".into(),
                 rule: Rule::new(RuleMethod::Moore, vec![2, 6, 9], vec![4, 6, 8, 9, 10], 10),
-                color_handler: ColorHandler::ColorPalette { /* Initialize based on your logic */ },
-                color_palette: vec![Color::srgb(1.0, 1.0, 0.0), Color::srgb(1.0, 0.0, 0.0)], // Assuming YELLOW and RED
+                color_handler: ColorHandler::NeighborhoodDensity,
+                color_palette: vec![Color::srgb(1.0, 1.0, 0.0), Color::srgb(1.0, 0.0, 0.0)],
             },
             Self {
                 name: "VN pyramid".into(),
                 rule: Rule::new(
                     RuleMethod::VonNeumann,
-                    vec![0, 1, 2, 3, 7, 8, 9, 11, 13, 18, 21, 22, 24, 26],
-                    vec![4, 13, 17, 20, 21, 22, 23, 24, 26],
+                    vec![0, 1, 2, 3, 4, 5],
+                    vec![1, 3],
                     2,
                 ),
-                color_handler: ColorHandler::ColorPalette { /* Initialize based on your logic */ },
-                color_palette: vec![Color::srgb(0.0, 1.0, 0.0), Color::srgb(0.0, 0.0, 1.0)], // Assuming GREEN and BLUE
+                color_handler: ColorHandler::NeighborhoodDensity,
+                color_palette: vec![Color::srgb(0.0, 1.0, 0.0), Color::srgb(0.0, 0.0, 1.0)],
             },
             Self {
                 name: "fancy snancy".into(),
@@ -117,24 +117,49 @@ impl RulePreset {
                     vec![4, 13, 17, 20, 21, 22, 23, 24, 26],
                     4,
                 ),
-                color_handler: ColorHandler::StateShading { /* Initialize based on your logic */ },
-                color_palette: vec![Color::srgb(1.0, 0.0, 0.0), Color::srgb(0.0, 0.0, 1.0)], // Assuming GREEN and BLUE
+                color_handler: ColorHandler::NeighborhoodDensity,
+                color_palette: vec![Color::srgb(1.0, 0.0, 0.0), Color::srgb(0.0, 0.0, 1.0)],
             },
             Self {
-                name: "Clouds 1".into(),
+                name: "pretty crystals".into(),
+                rule: Rule::new(RuleMethod::Moore, vec![5, 6, 7, 8], vec![6, 7, 9], 10),
+                color_handler: ColorHandler::Rgb,
+                color_palette: vec![Color::srgb(1.0, 0.0, 0.0), Color::srgb(0.0, 0.0, 1.0)],
+            },
+            Self {
+                name: "swapping structures".into(),
+                rule: Rule::new(RuleMethod::Moore, vec![3, 6, 9], vec![4, 8, 10], 20),
+                color_handler: ColorHandler::Rgb,
+                color_palette: vec![Color::srgb(1.0, 0.0, 0.0), Color::srgb(0.0, 0.0, 1.0)],
+            },
+            Self {
+                name: "slowly expanding blob".into(),
                 rule: Rule::new(
                     RuleMethod::Moore,
-                    vec![13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26],
-                    vec![13, 14, 17, 18, 19],
-                    2,
+                    vec![
+                        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+                    ],
+                    vec![5, 6, 7, 12, 13, 15],
+                    20,
                 ),
-                color_handler: ColorHandler::NeighborhoodDensity,
+                color_handler: ColorHandler::ColorPalette,
                 color_palette: vec![Color::srgb(1.0, 0.0, 0.0), Color::srgb(0.0, 0.0, 1.0)],
             },
             Self {
                 name: "Crystal Growth 1".into(),
                 rule: Rule::new(RuleMethod::Moore, vec![0, 1, 2, 3, 4, 5, 6], vec![1, 3], 2),
-                color_handler: ColorHandler::NeighborhoodDensity,
+                color_handler: ColorHandler::ColorPalette,
+                color_palette: vec![Color::srgb(1.0, 0.0, 0.0), Color::srgb(0.0, 0.0, 1.0)],
+            },
+            Self {
+                name: "Funny lines".into(),
+                rule: Rule::new(
+                    RuleMethod::Moore,
+                    vec![5],
+                    vec![4, 6, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+                    35,
+                ),
+                color_handler: ColorHandler::Rgb,
                 color_palette: vec![Color::srgb(1.0, 0.0, 0.0), Color::srgb(0.0, 0.0, 1.0)],
             },
         ]

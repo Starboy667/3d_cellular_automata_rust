@@ -1,7 +1,9 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use bevy::{
     core_pipeline::{bloom::BloomSettings, tonemapping::Tonemapping},
     prelude::*,
     render::{camera::PhysicalCameraParameters, view::NoFrustumCulling},
+    window::WindowMode,
 };
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use iyes_perf_ui::{entries::PerfUiBundle, PerfUiPlugin};
@@ -26,6 +28,7 @@ fn main() {
         .add_plugins((
             DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
+                    focused: true,
                     present_mode: bevy::window::PresentMode::Immediate,
                     title: "Cellular Automata".to_string(),
                     ..default()
@@ -35,6 +38,7 @@ fn main() {
             }),
             CustomMaterialPlugin,
         ))
+        .insert_resource(ClearColor(Color::BLACK))
         .add_plugins(PanOrbitCameraPlugin)
         .add_plugins(SimsPlugin)
         .add_plugins(SimUIPlugin)
@@ -83,7 +87,7 @@ fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>) {
                 transform: Transform::from_xyz(200.0, 0.0, 15.0).looking_at(Vec3::ZERO, Vec3::Y),
                 ..default()
             },
-            BloomSettings::NATURAL,
+            BloomSettings::OLD_SCHOOL,
         ))
         .insert(PanOrbitCamera::default());
     commands.spawn(PerfUiBundle::default());

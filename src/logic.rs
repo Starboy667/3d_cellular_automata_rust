@@ -167,7 +167,7 @@ impl Logic {
                 for k in 0..self.bounds {
                     let index = pos_to_index(&IVec3::new(i, j, k), &self.bounds);
                     let val = perlin.get([i as f64 * scale, j as f64 * scale, k as f64 * scale]);
-                    if val > 0.7 {
+                    if val > 0.9 {
                         self.cells[index].value = rule.states;
                         self.test(rule, index, true);
                     }

@@ -31,10 +31,6 @@ fn color_picker(ui: &mut egui::Ui, color: &mut Color) {
 }
 
 pub fn update_ui(mut this: ResMut<Sims>, mut contexts: EguiContexts) {
-    // TODO rules
-    // TODO states
-    // TODO reset
-    // TODO simulator
     let mut bounds = this.bounds;
     egui::Window::new("Simulation").show(contexts.ctx_mut(), |ui| {
         ui.label("Settings");
@@ -51,8 +47,12 @@ pub fn update_ui(mut this: ResMut<Sims>, mut contexts: EguiContexts) {
             this.update_timer
                 .set_duration(std::time::Duration::from_secs_f32(speed));
         }
+        // RESET
+        if ui.button("Reset").clicked() {
+            this.reset();
+        }
         ui.label("Rule");
-        ui.horizontal(|ui| {
+        ui.horizontal_wrapped(|ui| {
             for i in 0..this.rule_preset.len() {
                 if ui.button(&this.rule_preset[i].name).clicked() {
                     this.load_rule_preset(i);
@@ -81,7 +81,9 @@ pub fn update_ui(mut this: ResMut<Sims>, mut contexts: EguiContexts) {
                 "NeighborhoodDensity",
             );
         });
-        if this.color_handler == ColorHandler::ColorPalette {
+        if this.color_handler == ColorHandler::ColorPalette
+            || this.color_handler == ColorHandler::StateShading
+        {
             ui.label("Color palette");
             color_picker(ui, &mut this.color_palette[0]);
             color_picker(ui, &mut this.color_palette[1]);

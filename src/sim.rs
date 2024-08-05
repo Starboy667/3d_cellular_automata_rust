@@ -1,7 +1,6 @@
 use bevy::{
     app::{Plugin, Update},
     color::{Color, ColorToComponents},
-    math::{ivec3, IVec3},
     prelude::{Query, Res, ResMut, Resource},
     time::{Time, Timer},
 };
@@ -11,6 +10,7 @@ use crate::{
     logic,
     render::{CellRenderer, InstanceData, InstanceMaterialData},
     rule,
+    utils::{center, index_to_pos},
 };
 
 #[derive(Resource)]
@@ -49,6 +49,10 @@ impl Sims {
         }
     }
 
+    pub fn reset(&mut self) {
+        self.set_size(self.bounds);
+    }
+
     pub fn set_size(&mut self, bounds: i32) {
         let rule = self.rule_handler.as_ref().unwrap();
         self.bounds = bounds;
@@ -74,18 +78,6 @@ impl Sims {
         self.color_handler = self.rule_preset[index].color_handler.clone();
         self.set_size(self.bounds);
     }
-}
-fn index_to_pos(index: usize, bounds: i32) -> IVec3 {
-    ivec3(
-        index as i32 % bounds,
-        index as i32 / bounds % bounds,
-        index as i32 / bounds / bounds,
-    )
-}
-
-pub fn center(bounds: i32) -> IVec3 {
-    let center = bounds / 2;
-    ivec3(center, center, center)
 }
 
 pub fn update(
@@ -114,7 +106,7 @@ pub fn update(
         if value == 0 {
             continue;
         }
-        let pos = index_to_pos(i, this.bounds);
+        let pos = index_to_pos(&i, &this.bounds);
         instance_data.push(InstanceData {
             position: (pos - center(this.bounds)).as_vec3(),
             scale: 1.0,
